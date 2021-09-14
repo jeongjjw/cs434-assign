@@ -184,7 +184,7 @@ class FunSetSuite extends FunSuite {
         param != 100000
       }
 
-      assert(!exsits(k, tespk), "exist 3")
+      assert(!exsits(k, testk), "exist 3")
     }
   }
 
