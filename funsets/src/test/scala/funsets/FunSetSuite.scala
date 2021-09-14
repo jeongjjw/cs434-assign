@@ -86,7 +86,7 @@ class FunSetSuite extends FunSuite {
    * Once you finish your implementation of "singletonSet", exchange the
    * function "ignore" by "test".
    */
-  ignore("singletonSet(1) contains 1") {
+  test("singletonSet(1) contains 1") {
     
     /**
      * We create a new instance of the "TestSets" trait, this gives us access
@@ -101,7 +101,7 @@ class FunSetSuite extends FunSuite {
     }
   }
 
-  ignore("union contains all elements") {
+  test("union contains all elements") {
     new TestSets {
       val s = union(s1, s2)
       assert(contains(s, 1), "Union 1")
@@ -109,4 +109,59 @@ class FunSetSuite extends FunSuite {
       assert(!contains(s, 3), "Union 3")
     }
   }
+
+  test("test intersect method") {
+    new TestSets {
+      val s = intersect(s1, s2)
+      assert(!contains(s, 1), "Intersect 1")
+      assert(!contains(s, 2), "Intersect 2")
+
+      val intersectSame = intersect(s3, s3)
+      assert(contains(intersectSame, 3), "Intersect 3")
+    }
+  }
+
+  test("test diff method") {
+    new TestSets {
+      val s = diff(s1, s2)
+      assert(contains(s, 1), "Diff 1")
+      assert(!contains(s, 2), "Diff 2")
+    }
+  }
+
+  test("test filter method") {
+    new TestSets {
+      def testPredicate(param: Int): Boolean = {
+        param == 1
+      }
+      val x1 = filter(s1, testPredicate)
+      val x2 = filter(s2, testPredicate)
+      val x3 = filter(s3, testPredicate)
+
+      assert(contains(x1, 1), "filter 1")
+      assert(!contains(x2, 1), "filter 2")
+      assert(!contains(x3, 1), "filter 3")
+    }
+  }
+
+  test("test forall method") {
+    new TestSets {
+      def testp(param: Int): Boolean = true
+      
+      var k = singletonSet(0)
+      for(i <- -1000 to 1000) {
+        k = union(k, singletonSet(i))
+      }
+
+      assert(forall(k, testp), "forall 1")
+      
+      def testn(param: Int): Boolean = {
+        param != 1
+      }
+
+      assert(!forall(k, testn), "forall 2")
+    }
+  }
+
+
 }
