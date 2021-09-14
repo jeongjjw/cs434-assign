@@ -32,7 +32,7 @@ object FunSets {
    */
   def union(s: Set, t: Set): Set = {
     (param: Int) => {
-      s(param) || t(param)
+      contains(s, param) || contains(t, param)
     }
   }
 
@@ -42,7 +42,7 @@ object FunSets {
    */
   def intersect(s: Set, t: Set): Set = {
     (param: Int) => {
-      s(param) && t(param)
+      contains(s, param) && contains(t, param)
     }
   }
 
@@ -52,7 +52,7 @@ object FunSets {
    */
   def diff(s: Set, t: Set): Set = {
     (param: Int) => {
-      s(param) && !t(param)
+      contains(s, param) && !contains(t, param)
     }
   }
 
@@ -61,7 +61,7 @@ object FunSets {
    */
   def filter(s: Set, p: Int => Boolean): Set = {
     (param: Int) => {
-      s(param) && p(param)
+      contains(s, param) && p(param)
     }
   }
 
@@ -75,11 +75,11 @@ object FunSets {
    */
   def forall(s: Set, p: Int => Boolean): Boolean = {
     def iter(a: Int): Boolean = {
-      if (???) ???
-      else if (???) ???
-      else iter(???)
+      if (a < -bound) true
+      else if (contains(s, a) && !p(a)) false
+      else iter(a - 1)
     }
-    iter(???)
+    iter(bound)
   }
 
   /**

@@ -143,4 +143,25 @@ class FunSetSuite extends FunSuite {
       assert(!contains(x3, 1), "filter 3")
     }
   }
+
+  test("test forall method") {
+    new TestSets {
+      def testp(param: Int): Boolean = true
+      
+      var k = singletonSet(0)
+      for(i <- -1000 to 1000) {
+        k = union(k, singletonSet(i))
+      }
+
+      assert(forall(k, testp), "forall 1")
+      
+      def testn(param: Int): Boolean = {
+        param != 1
+      }
+
+      assert(!forall(k, testn), "forall 2")
+    }
+  }
+
+
 }
