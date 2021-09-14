@@ -163,5 +163,60 @@ class FunSetSuite extends FunSuite {
     }
   }
 
+  test("test exists method") {
+    new TestSets {
+      def testp(param: Int): Boolean = false
+      
+      var k = singletonSet(0)
+      for(i <- -1000 to 1000) {
+        k = union(k, singletonSet(i))
+      }
 
+      assert(!exists(k, testp), "exist 1")
+
+      def testn(param: Int): Boolean = {
+        param != 1
+      }
+
+      assert(exists(k, testp), "exist 2")
+
+      def testk(param: Int): Boolean = {
+        param != 100000
+      }
+
+      assert(!exsits(k, tespk), "exist 3")
+    }
+  }
+
+  test("test map method 1") {
+    new TestSets {
+      def mapAddTwo(param: Int): Int = param + 2
+
+      val k = union(union(s1, s2), s3)
+
+      val mappedSet = map(k, mapAddTwo)
+
+      assert(!contains(mappedSet, 1), "map 1")
+      assert(!contains(mappedSet, 2), "map 2")
+      assert(contains(mappedSet, 3), "map 3")
+      assert(contains(mappedSet, 4), "map 4")
+    }
+  }
+
+  test("test map method 2") {
+    new TestSets {
+      def mapAddTwo(param: Int): Int = param * 2
+
+      val k = union(union(s1, s2), s3)
+
+      val mappedSet = map(k, mapAddTwo)
+
+      assert(!contains(mappedSet, 1), "map 1")
+      assert(contains(mappedSet, 2), "map 2")
+      assert(!contains(mappedSet, 3), "map 3")
+      assert(contains(mappedSet, 4), "map 4")
+      assert(contains(mappedSet, 6), "map 6")
+      assert(!contains(mappedSet, 1000000), "map 1000000")
+    }
+  }
 }
