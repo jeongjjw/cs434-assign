@@ -1,10 +1,10 @@
-name: Assignment 0 example CI
+name: Assignment 2 funset CI
 
 on:
   pull_request:
   push:
     paths:
-      -'recfun/**'
+      -'funsets/**'
 
 jobs:
   build:
@@ -19,5 +19,5 @@ jobs:
         java-version: '8.0.292'
         distribution: 'adopt'
     - name: Run tests
-      working-directory: recfun
+      working-directory: funsets
       run: sbt test
