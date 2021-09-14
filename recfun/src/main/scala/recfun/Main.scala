@@ -29,8 +29,12 @@ object Main {
     def balanceAux(balanceNumber: Int, charList: List[Char]): Boolean = {
       if (balanceNumber < 0) {
         false
-      } else if (charList.isEmpty && balanceNumber == 0) {
-        true
+      } else if (charList.isEmpty) {
+        if (balanceNumber == 0) {
+          true
+        } else {
+          false
+        }
       } else {
         if (charList.head == '(') {
           balanceAux(balanceNumber + 1, charList.tail)
@@ -47,5 +51,15 @@ object Main {
   /**
    * Exercise 3
    */
-  def countChange(money: Int, coins: List[Int]): Int = ???
+  def countChange(money: Int, coins: List[Int]): Int = {
+    if (money == 0) {
+      1
+    } else if (money < 0) {
+      0
+    } else if (coins.isEmpty) {
+      0
+    } else {
+      countChange(money - coins.head, coins) + countChange(money, coins.tail)
+    }
+  }
 }
