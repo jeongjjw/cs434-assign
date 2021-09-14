@@ -120,4 +120,27 @@ class FunSetSuite extends FunSuite {
       assert(contains(intersectSame, 3), "Intersect 3")
     }
   }
+
+  test("test diff method") {
+    new TestSets {
+      val s = diff(s1, s2)
+      assert(contains(s, 1), "Diff 1")
+      assert(!contains(s, 2), "Diff 2")
+    }
+  }
+
+  test("test filter method") {
+    new TestSets {
+      def testPredicate(param: Int): Boolean = {
+        param == 1
+      }
+      val x1 = filter(s1, testPredicate)
+      val x2 = filter(s2, testPredicate)
+      val x3 = filter(s3, testPredicate)
+
+      assert(contains(x1, 1), "filter 1")
+      assert(!contains(x2, 1), "filter 2")
+      assert(!contains(x3, 1), "filter 3")
+    }
+  }
 }
