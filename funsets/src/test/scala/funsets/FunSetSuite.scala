@@ -178,7 +178,7 @@ class FunSetSuite extends FunSuite {
         param != 1
       }
 
-      assert(exists(k, testp), "exist 2")
+      assert(exists(k, testn), "exist 2")
 
       def testk(param: Int): Boolean = {
         param != 100000
