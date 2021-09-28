@@ -1,10 +1,10 @@
-name: Assignment 3 CI
+name: Assignment 4 CI
 
 on:
   pull_request:
   push:
     paths:
-      -'objsets/**'
+      -'patmat/**'
 
 jobs:
   build:
@@ -19,5 +19,5 @@ jobs:
         java-version: '8.0.292'
         distribution: 'adopt'
     - name: Run tests
-      working-directory: objsets
+      working-directory: patmat
       run: sbt test
