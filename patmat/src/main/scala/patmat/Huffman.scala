@@ -27,13 +27,13 @@ object Huffman {
   // Part 1: Basics
 
   def weight(tree: CodeTree): Int = tree match {
-    case Leaf(_, weightParam) => weightParam
-    case Fork(_, _, _, weightParam) => weightParam
+    case Leaf(_, weight) => weight
+    case Fork(_, _, _, weight) => weight
   }
 
   def chars(tree: CodeTree): List[Char] = tree match {
-    case Leaf(charParam, _) => charParam :: Nil
-    case Fork(_, _, charsParam,_) => charsParam
+    case Leaf(char, _) => char :: Nil
+    case Fork(_, _, chars,_) => chars
   }
 
   def makeCodeTree(left: CodeTree, right: CodeTree) =
@@ -78,23 +78,23 @@ object Huffman {
    *   }
    */
   def times(chars: List[Char]): List[(Char, Int)] = {
-    def times_Aux(chars_Aux: List[Char], list_Accum: List[(Char, Int)]): List[(Char, Int)] = chars_Aux match {
-      case Nil => list_Accum
+    def accumulateOccurenceList(charsLeftToCompute: List[Char], accumulatedList: List[(Char, Int)]): List[(Char, Int)] = charsLeftToCompute match {
+      case Nil => accumulatedList
       case head :: tl => {
-        val listWithHead = list_Accum.filter(x => x._1 == head)
-        val listWithHeadSize = listWithHead.size
-        val listWithoutHead = list_Accum.filter(x => x._1 != head)
+        val listOnlyContainingHeadChar = accumulatedList.filter(x => x._1 == head)
+        val listNotContainingHeadChar = accumulatedList.filter(x => x._1 != head)
+        val sizeOfListOnlyContainingHeadChar = listOnlyContainingHeadChar.size
 
-        assert(listWithHeadSize == 0 || listWithHeadSize == 1)
+        assert(sizeOfListOnlyContainingHeadChar == 0 || sizeOfListOnlyContainingHeadChar == 1)
 
-        if (listWithHeadSize == 0) {
-          times_Aux(tl, (head, 1) :: list_Accum)
+        if (sizeOfListOnlyContainingHeadChar == 0) {
+          accumulateOccurenceList(tl, (head, 1) :: accumulatedList)
         } else {
-          times_Aux(tl, (head, listWithHead(0)._2 + 1) :: listWithoutHead)
+          accumulateOccurenceList(tl, (head, listOnlyContainingHeadChar(0)._2 + 1) :: listNotContainingHeadChar)
         }
       }
     }
-    times_Aux(chars, List());
+    accumulateOccurenceList(chars, List());
   }
 
   /**
@@ -104,19 +104,19 @@ object Huffman {
    * head of the list should have the smallest weight), where the weight
    * of a leaf is the frequency of the character.
    */
-  def insertion(freqs_list: List[Leaf], elem: (Char, Int)): List[Leaf] = freqs_list match {
-    case Nil => List(Leaf(elem._1, elem._2))
-    case head :: tl =>
-      if (head.weight >= elem._2) {
-        Leaf(elem._1, elem._2) :: freqs_list
+  def insertLeafInCorrectOrder(orderedLeafList: List[Leaf], leafToInsert: (Char, Int)): List[Leaf] = orderedLeafList match {
+    case Nil => List(Leaf(leafToInsert._1, leafToInsert._2))
+    case head :: tail =>
+      if (head.weight >= leafToInsert._2) {
+        Leaf(leafToInsert._1, leafToInsert._2) :: orderedLeafList
       } else {
-        head :: insertion(tl, elem)
+        head :: insertLeafInCorrectOrder(tail, leafToInsert)
       }
   }
 
   def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = freqs match {
     case Nil => Nil
-    case head :: tl => insertion(makeOrderedLeafList(tl), head)
+    case head :: tail => insertLeafInCorrectOrder(makeOrderedLeafList(tail), head)
   }
 
   /**
@@ -136,28 +136,28 @@ object Huffman {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-  def insertCodeTreeByOrder(codeTreeList: List[CodeTree], codeTree: Fork): List[CodeTree] = codeTreeList match {
-    case Nil => List(codeTree)
-    case head :: tl => {
+  def insertCodeTreeInCorrectOrder(orderedCodeTreeList: List[CodeTree], codeTreeToInsert: Fork): List[CodeTree] = orderedCodeTreeList match {
+    case Nil => List(codeTreeToInsert)
+    case head :: tail => {
       head match {
-        case Leaf(_, weightParam) => 
-          if (weightParam >= codeTree.weight) {
-            codeTree :: codeTreeList
+        case Leaf(_, weight) => 
+          if (weight >= codeTreeToInsert.weight) {
+            codeTreeToInsert :: orderedCodeTreeList
           } else {
-            head :: insertCodeTreeByOrder(tl, codeTree)
+            head :: insertCodeTreeInCorrectOrder(tail, codeTreeToInsert)
           }
-        case Fork(_, _, _, weightParam) => 
-          if (weightParam >= codeTree.weight) {
-            codeTree :: codeTreeList
+        case Fork(_, _, _, weight) => 
+          if (weight >= codeTreeToInsert.weight) {
+            codeTreeToInsert :: orderedCodeTreeList
           } else {
-            head :: insertCodeTreeByOrder(tl, codeTree)
+            head :: insertCodeTreeInCorrectOrder(tail, codeTreeToInsert)
           }
       }
     }
   }
 
   def combine(trees: List[CodeTree]): List[CodeTree] = trees match {
-    case first :: second :: tl => insertCodeTreeByOrder(tl, makeCodeTree(first, second))
+    case first :: second :: tail => insertCodeTreeInCorrectOrder(tail, makeCodeTree(first, second))
     case _ => trees
   }
 
@@ -202,17 +202,17 @@ object Huffman {
    * the resulting list of characters.
    */
   def decode(tree: CodeTree, bits: List[Bit]): List[Char] = {
-    def decode_Aux(tree_Aux: CodeTree, bits_Aux: List[Bit], chars_Aux: List[Char]): List[Char] = tree_Aux match {
-      case Leaf(char, _) => decode_Aux(tree, bits_Aux, chars_Aux :+ char) 
-      case Fork(left, right, chars, _) => bits_Aux match {
-        case Nil => chars_Aux
-        case head :: tl => head match {
-          case 0 => decode_Aux(left, tl, chars_Aux)
-          case 1 => decode_Aux(right, tl, chars_Aux)
+    def accumulateDecodedChars(currentTree: CodeTree, bitsLeftToDecode: List[Bit], decodedCharsList: List[Char]): List[Char] = currentTree match {
+      case Leaf(char, _) => accumulateDecodedChars(tree, bitsLeftToDecode, decodedCharsList :+ char) 
+      case Fork(left, right, chars, _) => bitsLeftToDecode match {
+        case Nil => decodedCharsList
+        case head :: tail => head match {
+          case 0 => accumulateDecodedChars(left, tail, decodedCharsList)
+          case 1 => accumulateDecodedChars(right, tail, decodedCharsList)
         }
       }
     }
-    decode_Aux(tree, bits, List())
+    accumulateDecodedChars(tree, bits, List())
   }
 
   /**
@@ -242,16 +242,16 @@ object Huffman {
    * into a sequence of bits.
    */
   def encode(tree: CodeTree)(text: List[Char]): List[Bit] = {
-    def encodeSingleChar(character: Char, currentTree: CodeTree, singleCharacterEncode: List[Bit]): List[Bit] = currentTree match {
-      case Leaf(_, _) => singleCharacterEncode
+    def encodeSingleChar(charToEncode: Char, currentTree: CodeTree, encodedBit: List[Bit]): List[Bit] = currentTree match {
+      case Leaf(_, _) => encodedBit
       case Fork(left, right, _, _) => {
-        if (chars(left).contains(character)) encodeSingleChar(character, left, singleCharacterEncode :+ 0)
-        else encodeSingleChar(character, right, singleCharacterEncode :+ 1)
+        if (chars(left).contains(charToEncode)) encodeSingleChar(charToEncode, left, encodedBit :+ 0)
+        else encodeSingleChar(charToEncode, right, encodedBit :+ 1)
       } 
     }
-    def encodeCharList(charList: List[Char], charactersEncode: List[Bit]): List[Bit] = charList match {
-      case Nil => charactersEncode
-      case head :: tl => encodeCharList(tl, charactersEncode ++ encodeSingleChar(head, tree, Nil))
+    def encodeCharList(charListToEncode: List[Char], encodedCharsList: List[Bit]): List[Bit] = charListToEncode match {
+      case Nil => encodedCharsList
+      case head :: tail => encodeCharList(tail, encodedCharsList ++ encodeSingleChar(head, tree, Nil))
     }
     encodeCharList(text, List())
   }
@@ -267,9 +267,9 @@ object Huffman {
    */
   def codeBits(table: CodeTable)(char: Char): List[Bit] = table match {
     case Nil => Nil
-    case head :: tl => {
+    case head :: tail => {
       if (head._1 == char) head._2
-      else codeBits(tl) (char) 
+      else codeBits(tail) (char) 
     }
   }
 
@@ -305,7 +305,7 @@ object Huffman {
    */
   def quickEncode(tree: CodeTree)(text: List[Char]): List[Bit] = {
     val codeTable = convert(tree)
-    def encodeTextFromCodeTable(text: List[Char], encodedBit: List[Bit]): List[Bit] = text match {
+    def encodeTextFromCodeTable(charsLeftToEncode: List[Char], encodedBit: List[Bit]): List[Bit] = charsLeftToEncode match {
       case Nil => encodedBit
       case head :: tl => encodeTextFromCodeTable(tl, encodedBit ++ codeBits(codeTable) (head))
     }
