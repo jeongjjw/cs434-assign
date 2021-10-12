@@ -87,3 +87,36 @@ Chapter 8. Boundaries
 ### 2. Learning tests
     - log4j 
 ### 3. Clean boundaries 
+
+
+Chapter 9. Unit Tests
+======
+1. The three laws of TDD
+- failing unit test -> production code
+- don't write unit test than is sufficient to fail
+- don't write production code than is sufficent to pass
+
+2. Clean Tests
+- keep test clean and readable
+- Apply one assert per test
+- Single concept per test
+
+3. Five rules
+- Fast
+- Independent
+- Repeatable
+- Self-validating
+- Timely
+
+- Makes it easier for other people to understand
+- preserve and enhance reusability
+
+Chapter 10. Classes
+========
+1. Classes should be small
+
+2. The Single responsibility principle
+
+3. Maintaining cohesiion results in many small classes
+
+- Classes should be small and easy to read / have single reponsibility for easier maintenanace
