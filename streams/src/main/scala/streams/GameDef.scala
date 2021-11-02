@@ -145,7 +145,7 @@ trait GameDef {
     /**
      * Returns `true` if the block is standing.
      */
-    def isStanding: Boolean = b1 == b2
+    def isStanding: Boolean = b1.equals(b2)
 
     /**
      * Returns `true` if the block is entirely inside the terrain.
