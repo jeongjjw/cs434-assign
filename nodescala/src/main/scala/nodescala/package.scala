@@ -1,4 +1,5 @@
-import scala.language.postfixOps
+import java.util.NoSuchElementException
+import scala.language.{existentials, postfixOps}
 import scala.io.StdIn
 import scala.util._
 import scala.util.control.NonFatal
@@ -30,9 +31,20 @@ package object nodescala {
      */
     def all[T](fs: List[Future[T]]): Future[List[T]] = {
       val promiseList = Promise[List[T]]
-      fs.foldLeft(promiseList.success(Nil).future) {
-        (accumList, arg) => for {headList <- accumList; tailElem <- arg} yield headList :+ tailElem
+      promiseList.success(Nil)
+
+      def all_aux[T](futureList: List[Future[T]], accumList: List[T]) = futureList match {
+        case Nil => promiseList.success(accumList)
+        case head :: tail => {
+          head.onComplete{
+            case Success(cor) => all_aux(tail, accumList :+ cor)
+            case Failure(exception) => promiseList.tryFailure(exception)
+          }
+        }
       }
+
+      all_aux(fs, Nil)
+      promiseList.future
     }
     /** Given a list of futures `fs`, returns the future holding the value of the future from `fs` that completed first.
      *  If the first completing future in `fs` fails, then the result is failed as well.

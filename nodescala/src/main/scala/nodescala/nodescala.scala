@@ -49,13 +49,11 @@ trait NodeScala {
     val listener = createListener(relativePath)
     val subscription = listener.start()
     Future.run() { hl =>
-        
         async {
           while (hl.nonCancelled) {
             val (req, exchange) = await(listener.nextRequest)
             respond(exchange, hl, handler(req))
           }
-
           subscription unsubscribe()
         }
     }
