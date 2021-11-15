@@ -66,9 +66,9 @@ package object nodescala {
     /** Creates a cancellable context for an execution and runs it.
      */
     def run()(f: CancellationToken => Future[Unit]): Subscription = {
-      val cancellationToken = CancellationTokenSource()
-      f (cancellationToken cancellationToken)
-      cancellationToken
+      val cancellationTokenVal = CancellationTokenSource()
+      f (cancellationTokenVal cancellationToken)
+      cancellationTokenVal
     }
 
   }
