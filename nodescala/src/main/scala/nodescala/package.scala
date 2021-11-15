@@ -29,22 +29,16 @@ package object nodescala {
      *  The values in the list are in the same order as corresponding futures `fs`.
      *  If any of the futures `fs` fails, the resulting future also fails.
      */
-    def all[T](fs: List[Future[T]]): Future[List[T]] = {
-      val promiseList = Promise[List[T]]
-      promiseList.success(Nil)
+    def all[T](fs: List[Future[T]]): Future[List[T]] = fs match {
+      case head :: tail => mergeFutureListWithElem(head, all(tail))
+      case Nil => Future.successful(Nil)
+    }
 
-      def all_aux[T](futureList: List[Future[T]], accumList: List[T]) = futureList match {
-        case Nil => promiseList.success(accumList)
-        case head :: tail => {
-          head.onComplete{
-            case Success(cor) => all_aux(tail, accumList :+ cor)
-            case Failure(exception) => promiseList.tryFailure(exception)
-          }
-        }
-      }
-
-      all_aux(fs, Nil)
-      promiseList.future
+    private def mergeFutureListWithElem[T](fs1: Future[T], fs2: Future[List[T]]): Future[List[T]] = {
+      for {
+        first <- fs1
+        second <- fs2
+      } yield first::second
     }
     /** Given a list of futures `fs`, returns the future holding the value of the future from `fs` that completed first.
      *  If the first completing future in `fs` fails, then the result is failed as well.
